@@ -51,3 +51,21 @@ pub fn create_mod(path: &Path, kotlin: bool) -> Result<(), Error> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use crate::fabric;
+
+    #[test]
+    fn test_create_mod() {
+        let path = PathBuf::from("test");
+        fabric::create_mod(&path, false).unwrap();
+
+        let git_dir = path.join(".git");
+        assert!(git_dir.exists());
+
+        std::fs::remove_dir_all(path).unwrap();
+    }
+}
