@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::git;
+use crate::{git, refactor};
 
 #[derive(Debug)]
 pub struct Error {
@@ -29,7 +29,15 @@ impl From<std::io::Error> for Error {
     }
 }
 
-pub fn create_mod(path: &Path, kotlin: bool) -> Result<(), Error> {
+impl From<refactor::Error> for Error {
+    fn from(error: refactor::Error) -> Self {
+        Error {
+            message: error.to_string(),
+        }
+    }
+}
+
+pub fn create_mod(path: &Path, kotlin: bool, main_class: &str) -> Result<(), Error> {
     // Clone the Kotlin example mod
     let template_url: &str;
     if kotlin {
@@ -49,23 +57,40 @@ pub fn create_mod(path: &Path, kotlin: bool) -> Result<(), Error> {
     let repo = git::Context::new(&Some(path))?;
     repo.git(&["init"])?;
 
+    // Rename the package
+    let old_package = "net.fabricmc.example";
+    let new_package = main_class[..main_class.rfind('.').unwrap()].to_string();
+    refactor::rename_package(path, kotlin, &old_package, &new_package)?;
+
+    // Rename the class
+    let old_class = new_package + ".ExampleMod";
+    let new_class = main_class;
+    refactor::rename_class(path, kotlin, &old_class, &new_class)?;
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use crate::fabric;
 
     #[test]
-    fn test_create_mod() {
-        let path = PathBuf::from("test");
-        fabric::create_mod(&path, false).unwrap();
+    fn test_create_mod_creates_git_repo() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_creates_git_repo");
+        fabric::create_mod(&path, false, "net.fabricmc.example.ExampleMod").unwrap();
 
         let git_dir = path.join(".git");
         assert!(git_dir.exists());
+    }
 
-        std::fs::remove_dir_all(path).unwrap();
+    #[test]
+    fn test_create_mod_moves_entrypoint() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_moves_entrypoint");
+        fabric::create_mod(&path, false, "net.fabricmc.example2.ExampleMod2").unwrap();
+
+        let entrypoint = path.join("src/main/java/net/fabricmc/example2/ExampleMod2.java");
+        assert!(entrypoint.exists());
     }
 }
