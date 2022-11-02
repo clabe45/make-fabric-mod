@@ -11,10 +11,13 @@ use crate::fabric;
     about = "Create a new Fabric mod"
 )]
 struct Opts {
+    #[clap(short = 'k', long = "kotlin", help = "Use Kotlin instead of Java")]
+    kotlin: bool,
+
     path: PathBuf,
 }
 
 pub fn cli() {
     let opts = Opts::parse();
-    fabric::create_mod(&opts.path).unwrap();
+    fabric::create_mod(&opts.path, opts.kotlin).unwrap();
 }

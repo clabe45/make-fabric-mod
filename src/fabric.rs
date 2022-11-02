@@ -29,14 +29,17 @@ impl From<std::io::Error> for Error {
     }
 }
 
-pub fn create_mod(path: &Path) -> Result<(), Error> {
+pub fn create_mod(path: &Path, kotlin: bool) -> Result<(), Error> {
     // Clone the Kotlin example mod
+    let template_url: &str;
+    if kotlin {
+        template_url = "https://github.com/clabe45/fabric-example-mod-kotlin";
+    } else {
+        template_url = "https://github.com/FabricMC/fabric-example-mod";
+    }
+
     let global = git::Context::new(&None)?;
-    global.git(&[
-        "clone",
-        "https://github.com/clabe45/fabric-example-mod-kotlin.git",
-        path.to_str().unwrap(),
-    ])?;
+    global.git(&["clone", template_url, path.to_str().unwrap()])?;
 
     // Remove the .git directory
     let git_dir = path.join(".git");
