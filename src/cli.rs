@@ -33,7 +33,8 @@ struct Opts {
     #[clap(
         short = 'i',
         long = "id",
-        help = "Mod ID. Defaults to the name of the directory"
+        help = "Mod ID. Defaults to the name of the directory",
+        default_value = ""
     )]
     mod_id: String,
 
