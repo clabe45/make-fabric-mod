@@ -4,6 +4,25 @@ use clap::Parser;
 
 use crate::{code::language::Language, fabric};
 
+#[derive(Debug)]
+pub struct Error {
+    message: String,
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl From<fabric::Error> for Error {
+    fn from(error: fabric::Error) -> Self {
+        Error {
+            message: error.to_string(),
+        }
+    }
+}
+
 #[derive(Parser, Debug)]
 #[command(
     author = "Caleb Sacks",
@@ -35,7 +54,7 @@ struct Opts {
     path: PathBuf,
 }
 
-pub fn cli() -> Result<(), fabric::Error> {
+pub fn cli() -> Result<(), Error> {
     let opts = Opts::parse();
     let mod_id = if opts.mod_id.is_empty() {
         opts.path.file_name().unwrap().to_str().unwrap().to_string()
