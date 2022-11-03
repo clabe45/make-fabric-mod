@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use super::language::Language;
+
 #[derive(Debug)]
 pub struct Error {
     message: String,
@@ -36,14 +38,12 @@ fn recursive_replace(path: &Path, old: &str, new: &str) -> Result<(), Error> {
 
 pub fn rename_package(
     path: &Path,
-    kotlin: bool,
+    language: &Language,
     old_package: &str,
     new_package: &str,
 ) -> Result<(), Error> {
     // Move the entrypoint to the correct location
-    let base_path = path
-        .join("src/main")
-        .join(if kotlin { "kotlin" } else { "java" });
+    let base_path = path.join("src/main").join(language.module_name());
 
     let old_package_path = base_path.join(old_package.replace(".", "/"));
     let new_package_path = base_path.join(new_package.replace(".", "/"));
@@ -62,19 +62,15 @@ pub fn rename_package(
 
 pub fn rename_class(
     path: &Path,
-    kotlin: bool,
+    language: &Language,
     old_class: &str,
     new_class: &str,
 ) -> Result<(), Error> {
-    let file_extension = if kotlin { "kt" } else { "java" };
-
     // Move the entrypoint to the correct location
-    let base_path = path
-        .join("src/main")
-        .join(if kotlin { "kotlin" } else { "java" });
+    let base_path = path.join("src/main").join(language.module_name());
 
-    let old_class_path = base_path.join(old_class.replace(".", "/") + "." + file_extension);
-    let new_class_path = base_path.join(new_class.replace(".", "/") + "." + file_extension);
+    let old_class_path = base_path.join(old_class.replace(".", "/") + "." + language.extension());
+    let new_class_path = base_path.join(new_class.replace(".", "/") + "." + language.extension());
 
     // Create the directory if it doesn't exist
     if let Some(parent) = new_class_path.parent() {
@@ -137,7 +133,7 @@ public class ExampleMod {}",
 
         rename_package(
             &temp_dir.path(),
-            false,
+            &Language::Java,
             "net.fabricmc.example",
             "com.example",
         )
@@ -172,7 +168,7 @@ public class ExampleMod {}",
 
         rename_class(
             &temp_dir.path(),
-            false,
+            &Language::Java,
             "net.fabricmc.example.ExampleMod",
             "com.example.ExampleMod2",
         )

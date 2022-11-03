@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::fabric;
+use crate::{code::language::Language, fabric};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -27,5 +27,10 @@ struct Opts {
 
 pub fn cli() {
     let opts = Opts::parse();
-    fabric::create_mod(&opts.path, opts.kotlin, &opts.main_class).unwrap();
+    let language = if opts.kotlin {
+        Language::Kotlin
+    } else {
+        Language::Java
+    };
+    fabric::create_mod(&opts.path, &language, &opts.main_class).unwrap();
 }
