@@ -21,13 +21,25 @@ impl From<std::io::Error> for Error {
     }
 }
 
+fn is_text_file(path: &Path) -> bool {
+    let command = std::process::Command::new("file")
+        .arg("--mime-type")
+        .arg("--brief")
+        .arg(path)
+        .output()
+        .unwrap();
+
+    let output = String::from_utf8(command.stdout).unwrap();
+    output.starts_with("text/")
+}
+
 fn recursive_replace(path: &Path, old: &str, new: &str) -> Result<(), Error> {
     for entry in std::fs::read_dir(path)? {
         let entry = entry?;
         let path = entry.path();
         if path.is_dir() {
             recursive_replace(&path, old, new)?;
-        } else {
+        } else if is_text_file(&path) {
             let content = std::fs::read_to_string(&path)?;
             let content = content.replace(old, new);
             std::fs::write(&path, content)?;
@@ -96,7 +108,7 @@ mod tests {
     use std::fs;
     use std::io::Write;
 
-    fn create_test_file(path: &Path, content: &str) {
+    fn create_text_file(path: &Path, content: &str) {
         // Create the directory if it doesn't exist
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).unwrap();
@@ -107,11 +119,23 @@ mod tests {
         file.write_all(content.as_bytes()).unwrap();
     }
 
+    fn create_binary_file(path: &Path) {
+        // Create the directory if it doesn't exist
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).unwrap();
+        }
+
+        // Create the file
+        let mut file = fs::File::create(path).unwrap();
+        file.write_all(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+    }
+
     #[test]
     fn test_recursive_replace() {
         let temp_dir = tempfile::tempdir().unwrap();
         let test_file = temp_dir.path().join("test_file.txt");
-        create_test_file(&test_file, "Hello, world!");
+        create_text_file(&test_file, "Hello, world!");
+        create_binary_file(&temp_dir.path().join("test_file.bin"));
 
         recursive_replace(&temp_dir.path(), "world", "universe").unwrap();
 
@@ -131,7 +155,7 @@ mod tests {
             .join(language.to_string())
             .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
-        create_test_file(
+        create_text_file(
             &old_file,
             "package net.fabricmc.example;
 
@@ -172,7 +196,7 @@ public class ExampleMod {}"
             .join(language.to_string())
             .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
-        create_test_file(
+        create_text_file(
             &old_file,
             "package net.fabricmc.example;
 
