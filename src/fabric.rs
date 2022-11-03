@@ -113,8 +113,11 @@ pub fn create_mod(
         Language::Kotlin => "https://github.com/clabe45/fabric-example-mod-kotlin",
         Language::Java => "https://github.com/FabricMC/fabric-example-mod",
     };
+    println!("Cloning {}...", template_url);
     let global = git::Context::new(&None)?;
     global.git(&["clone", template_url, path.to_str().unwrap()])?;
+
+    println!("Re-initializing git repository...");
 
     // Remove the .git directory
     let git_dir = path.join(".git");
@@ -133,8 +136,11 @@ pub fn create_mod(
         Language::Kotlin => vec![Language::Kotlin, Language::Java],
     };
     for language in languages {
+        println!("Refactoring {} module...", language.to_string());
         refactor_module(path, &language, main_class)?;
     }
+
+    println!("Updating config files...");
 
     // Update the mixins config
     std::fs::rename(
@@ -152,6 +158,7 @@ pub fn create_mod(
     let base_name = &package[package.rfind('.').unwrap() + 1..].to_string();
     update_gradle_properties(path, &group, &base_name)?;
 
+    println!("Done!");
     Ok(())
 }
 
