@@ -27,7 +27,7 @@ struct Opts {
     #[clap(
         short = 'm',
         long = "main",
-        help = "Package and class name of the main class",
+        help = "Main class",
         default_value = "net.fabricmc.example.ExampleMod"
     )]
     main_class: String,
