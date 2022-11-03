@@ -78,6 +78,29 @@ fn update_gradle_properties(path: &Path, group: &str, base_name: &str) -> Result
     Ok(())
 }
 
+fn refactor_module(path: &Path, language: &Language, main_class: &str) -> Result<(), Error> {
+    // Rename the package
+    let old_package = "net.fabricmc.example";
+    let new_package = main_class[..main_class.rfind('.').unwrap()].to_string();
+    refactor::rename_package(path, language, &old_package, &new_package)?;
+
+    // Rename the main class (if contained in this module)
+    let main_class_exists = path
+        .join("src/main")
+        .join(language.to_string())
+        .join(new_package.replace('.', "/"))
+        .join(format!("ExampleMod.{}", language.extension()))
+        .exists();
+
+    if main_class_exists {
+        let old_class = format!("{}.ExampleMod", &new_package);
+        let new_class = main_class;
+        refactor::rename_class(path, language, &old_class, &new_class)?;
+    }
+
+    Ok(())
+}
+
 pub fn create_mod(
     path: &Path,
     mod_id: &str,
@@ -101,15 +124,17 @@ pub fn create_mod(
     let repo = git::Context::new(&Some(path))?;
     repo.git(&["init"])?;
 
-    // Rename the package
-    let old_package = "net.fabricmc.example";
-    let new_package = main_class[..main_class.rfind('.').unwrap()].to_string();
-    refactor::rename_package(path, language, &old_package, &new_package)?;
-
-    // Rename the class
-    let old_class = format!("{}.ExampleMod", &new_package);
-    let new_class = main_class;
-    refactor::rename_class(path, language, &old_class, &new_class)?;
+    // Refactor each module. If --kotlin is specified, refactor both the Java
+    // and Kotlin modules. The mixins are located in the Java module, and
+    // everything else is located in the Kotlin module. If --kotlin is not
+    // specified, only refactor the Java module.
+    let languages = match language {
+        Language::Java => vec![Language::Java],
+        Language::Kotlin => vec![Language::Kotlin, Language::Java],
+    };
+    for language in languages {
+        refactor_module(path, &language, main_class)?;
+    }
 
     // Update the mixins config
     std::fs::rename(
@@ -122,8 +147,9 @@ pub fn create_mod(
     update_mod_config(path, mod_id, main_class, name)?;
 
     // Update gradle.properties
-    let group = &new_package[..new_package.rfind('.').unwrap()].to_string();
-    let base_name = &new_package[new_package.rfind('.').unwrap() + 1..].to_string();
+    let package = main_class[..main_class.rfind('.').unwrap()].to_string();
+    let group = &package[..package.rfind('.').unwrap()].to_string();
+    let base_name = &package[package.rfind('.').unwrap() + 1..].to_string();
     update_gradle_properties(path, &group, &base_name)?;
 
     Ok(())
