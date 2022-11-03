@@ -35,7 +35,7 @@ struct Opts {
     path: PathBuf,
 }
 
-pub fn cli() {
+pub fn cli() -> Result<(), fabric::Error> {
     let opts = Opts::parse();
     let mod_id = if opts.mod_id.is_empty() {
         opts.path.file_name().unwrap().to_str().unwrap().to_string()
@@ -48,5 +48,6 @@ pub fn cli() {
         Language::Java
     };
 
-    fabric::create_mod(&opts.path, &mod_id, &language, &opts.main_class, &opts.name).unwrap();
+    fabric::create_mod(&opts.path, &mod_id, &language, &opts.main_class, &opts.name)?;
+    Ok(())
 }
