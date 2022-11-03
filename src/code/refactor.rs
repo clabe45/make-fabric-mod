@@ -90,6 +90,8 @@ pub fn rename_class(
 
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
+
     use super::*;
     use std::fs;
     use std::io::Write;
@@ -117,12 +119,17 @@ mod tests {
         assert_eq!(content, "Hello, universe!");
     }
 
-    #[test]
-    fn test_rename_package() {
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+
+    fn test_rename_package(#[case] language: Language) {
         let temp_dir = tempfile::tempdir().unwrap();
         let old_file = temp_dir
             .path()
-            .join("src/main/java/net/fabricmc/example/ExampleMod.java");
+            .join("src/main")
+            .join(language.module_name())
+            .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
         create_test_file(
             &old_file,
@@ -133,7 +140,7 @@ public class ExampleMod {}",
 
         rename_package(
             &temp_dir.path(),
-            &Language::Java,
+            &language,
             "net.fabricmc.example",
             "com.example",
         )
@@ -141,7 +148,9 @@ public class ExampleMod {}",
 
         let new_file = temp_dir
             .path()
-            .join("src/main/java/com/example/ExampleMod.java");
+            .join("src/main")
+            .join(language.module_name())
+            .join("com/example/ExampleMod.".to_string() + language.extension());
 
         let content = fs::read_to_string(&new_file).unwrap();
         assert_eq!(
@@ -152,12 +161,16 @@ public class ExampleMod {}"
         );
     }
 
-    #[test]
-    fn test_rename_class() {
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+    fn test_rename_class(#[case] language: Language) {
         let temp_dir = tempfile::tempdir().unwrap();
         let old_file = temp_dir
             .path()
-            .join("src/main/java/net/fabricmc/example/ExampleMod.java");
+            .join("src/main")
+            .join(language.module_name())
+            .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
         create_test_file(
             &old_file,
@@ -168,7 +181,7 @@ public class ExampleMod {}",
 
         rename_class(
             &temp_dir.path(),
-            &Language::Java,
+            &language,
             "net.fabricmc.example.ExampleMod",
             "com.example.ExampleMod2",
         )
@@ -176,7 +189,9 @@ public class ExampleMod {}",
 
         let new_file = temp_dir
             .path()
-            .join("src/main/java/com/example/ExampleMod2.java");
+            .join("src/main")
+            .join(language.module_name())
+            .join("com/example/ExampleMod2.".to_string() + language.extension());
 
         let content = fs::read_to_string(&new_file).unwrap();
         assert_eq!(

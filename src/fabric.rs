@@ -72,25 +72,35 @@ pub fn create_mod(path: &Path, language: &Language, main_class: &str) -> Result<
 
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
+
     use crate::{code::language::Language, fabric};
 
-    #[test]
-    fn test_create_mod_creates_git_repo() {
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+    fn test_create_mod_creates_git_repo(#[case] language: Language) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_creates_git_repo");
-        fabric::create_mod(&path, &Language::Java, "net.fabricmc.example.ExampleMod").unwrap();
+        fabric::create_mod(&path, &language, "net.fabricmc.example.ExampleMod").unwrap();
 
         let git_dir = path.join(".git");
         assert!(git_dir.exists());
     }
 
-    #[test]
-    fn test_create_mod_moves_entrypoint() {
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+    fn test_create_mod_moves_entrypoint(#[case] language: Language) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_moves_entrypoint");
-        fabric::create_mod(&path, &Language::Java, "net.fabricmc.example2.ExampleMod2").unwrap();
+        fabric::create_mod(&path, &language, "net.fabricmc.example2.ExampleMod2").unwrap();
 
-        let entrypoint = path.join("src/main/java/net/fabricmc/example2/ExampleMod2.java");
+        let entrypoint = path
+            .join("src/main")
+            .join(language.module_name())
+            .join("net/fabricmc/example2/ExampleMod2.".to_string() + language.extension());
+
         assert!(entrypoint.exists());
     }
 }
