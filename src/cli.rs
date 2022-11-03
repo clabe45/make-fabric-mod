@@ -18,7 +18,7 @@ struct Opts {
     )]
     mod_id: String,
 
-    #[clap(short = 'n', long = "name", help = "Mod name", required = true)]
+    #[clap(short = 'n', long = "name", help = "Mod name")]
     name: String,
 
     #[clap(short = 'k', long = "kotlin", help = "Use Kotlin instead of Java")]
