@@ -98,7 +98,7 @@ mod tests {
 
         let entrypoint = path
             .join("src/main")
-            .join(language.module_name())
+            .join(language.to_string())
             .join("net/fabricmc/example2/ExampleMod2.".to_string() + language.extension());
 
         assert!(entrypoint.exists());

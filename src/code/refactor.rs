@@ -43,7 +43,7 @@ pub fn rename_package(
     new_package: &str,
 ) -> Result<(), Error> {
     // Move the entrypoint to the correct location
-    let base_path = path.join("src/main").join(language.module_name());
+    let base_path = path.join("src/main").join(language.to_string());
 
     let old_package_path = base_path.join(old_package.replace(".", "/"));
     let new_package_path = base_path.join(new_package.replace(".", "/"));
@@ -67,7 +67,7 @@ pub fn rename_class(
     new_class: &str,
 ) -> Result<(), Error> {
     // Move the entrypoint to the correct location
-    let base_path = path.join("src/main").join(language.module_name());
+    let base_path = path.join("src/main").join(language.to_string());
 
     let old_class_path = base_path.join(old_class.replace(".", "/") + "." + language.extension());
     let new_class_path = base_path.join(new_class.replace(".", "/") + "." + language.extension());
@@ -128,7 +128,7 @@ mod tests {
         let old_file = temp_dir
             .path()
             .join("src/main")
-            .join(language.module_name())
+            .join(language.to_string())
             .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
         create_test_file(
@@ -149,7 +149,7 @@ public class ExampleMod {}",
         let new_file = temp_dir
             .path()
             .join("src/main")
-            .join(language.module_name())
+            .join(language.to_string())
             .join("com/example/ExampleMod.".to_string() + language.extension());
 
         let content = fs::read_to_string(&new_file).unwrap();
@@ -169,7 +169,7 @@ public class ExampleMod {}"
         let old_file = temp_dir
             .path()
             .join("src/main")
-            .join(language.module_name())
+            .join(language.to_string())
             .join("net/fabricmc/example/ExampleMod.".to_string() + language.extension());
 
         create_test_file(
@@ -190,7 +190,7 @@ public class ExampleMod {}",
         let new_file = temp_dir
             .path()
             .join("src/main")
-            .join(language.module_name())
+            .join(language.to_string())
             .join("com/example/ExampleMod2.".to_string() + language.extension());
 
         let content = fs::read_to_string(&new_file).unwrap();
