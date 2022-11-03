@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{git, refactor};
+use crate::{code::refactor, git};
 
 #[derive(Debug)]
 pub struct Error {
