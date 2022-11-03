@@ -11,6 +11,16 @@ use crate::{code::language::Language, fabric};
     about = "Create a new Fabric mod"
 )]
 struct Opts {
+    #[clap(
+        short = 'i',
+        long = "id",
+        help = "Mod ID. Defaults to the name of the directory"
+    )]
+    mod_id: String,
+
+    #[clap(short = 'n', long = "name", help = "Mod name", required = true)]
+    name: String,
+
     #[clap(short = 'k', long = "kotlin", help = "Use Kotlin instead of Java")]
     kotlin: bool,
 
@@ -27,10 +37,16 @@ struct Opts {
 
 pub fn cli() {
     let opts = Opts::parse();
+    let mod_id = if opts.mod_id.is_empty() {
+        opts.path.file_name().unwrap().to_str().unwrap().to_string()
+    } else {
+        opts.mod_id
+    };
     let language = if opts.kotlin {
         Language::Kotlin
     } else {
         Language::Java
     };
-    fabric::create_mod(&opts.path, &language, &opts.main_class).unwrap();
+
+    fabric::create_mod(&opts.path, &mod_id, &language, &opts.main_class, &opts.name).unwrap();
 }
