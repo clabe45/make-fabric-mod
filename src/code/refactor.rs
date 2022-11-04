@@ -57,6 +57,25 @@ fn recursive_replace(path: &Path, old: &str, new: &str) -> Result<(), Error> {
     Ok(())
 }
 
+fn is_dir_empty(path: &Path) -> Result<bool, Error> {
+    std::fs::read_dir(path)?
+        .next()
+        .map_or(Ok(true), |_| Ok(false))
+}
+
+fn remove_empty_parent_dirs(path: &Path) -> Result<(), Error> {
+    let mut path = path.to_path_buf();
+    while let Some(parent) = path.parent() {
+        if is_dir_empty(parent)? {
+            std::fs::remove_dir(parent)?;
+            path = parent.to_path_buf();
+        } else {
+            break;
+        }
+    }
+    Ok(())
+}
+
 pub fn rename_package(
     path: &Path,
     language: &Language,
@@ -74,6 +93,9 @@ pub fn rename_package(
 
     // Move the old package directory to the new package directory
     std::fs::rename(&old_package_path, &new_package_path)?;
+
+    // Remove the old package directory
+    remove_empty_parent_dirs(&old_package_path)?;
 
     // Update the package name in each source file
     recursive_replace(&base_path, old_package, new_package)?;
@@ -100,6 +122,9 @@ pub fn rename_class(
 
     // Rename the file
     std::fs::rename(&old_class_path, &new_class_path)?;
+
+    // Remove the old package directory if it's empty
+    remove_empty_parent_dirs(&old_class_path)?;
 
     // Update the class name in each source file
     let old_class_name = old_class.split('.').last().unwrap();
@@ -192,6 +217,13 @@ public class ExampleMod {}",
 
 public class ExampleMod {}"
         );
+
+        let old_package_root = temp_dir
+            .path()
+            .join("src/main")
+            .join(language.to_string())
+            .join("net");
+        assert!(!old_package_root.exists());
     }
 
     #[rstest]
