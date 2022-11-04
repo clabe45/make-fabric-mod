@@ -60,11 +60,14 @@ fn update_mod_config(path: &Path, mod_id: &str, main_class: &str, name: &str) ->
     let config_path = path.join("src/main/resources/fabric.mod.json");
     let mut config: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(&config_path)?)?;
+
     config["id"] = serde_json::Value::String(mod_id.to_string());
     config["name"] = serde_json::Value::String(name.to_string());
     config["description"] = serde_json::Value::String("".to_string());
+    config["icon"] = serde_json::Value::String(format!("assets/{}/icon.png", mod_id));
     config["entrypoints"]["main"][0] = serde_json::Value::String(main_class.to_string());
     config["mixins"][0] = serde_json::Value::String(format!("{}.mixins.json", mod_id));
+
     std::fs::write(config_path, serde_json::to_string_pretty(&config)?)?;
     Ok(())
 }
@@ -153,6 +156,11 @@ pub fn create_mod(
         file::recursive_replace(&module_root_path, "\"modid\"", &format!("\"{}\"", mod_id))?;
     }
 
+    // Move the assets directory to the correct location
+    let old_assets_path = path.join("src/main/resources/assets/modid");
+    let new_assets_path = path.join(format!("src/main/resources/assets/{}", mod_id));
+    std::fs::rename(old_assets_path, new_assets_path)?;
+
     println!("Updating config files...");
 
     // Update the mixins config
@@ -230,6 +238,25 @@ mod tests {
     #[rstest]
     #[case(Language::Java)]
     #[case(Language::Kotlin)]
+    fn test_create_mod_moves_assets(#[case] language: Language) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_moves_assets");
+        fabric::create_mod(
+            &path,
+            "example-mod2",
+            &language,
+            "net.fabricmc.example3.ExampleMod2",
+            "Example Mod 2",
+        )
+        .unwrap();
+
+        let assets = path.join("src/main/resources/assets/example-mod2");
+        assert!(assets.exists());
+    }
+
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
     fn test_create_mod_renames_mixin_config(#[case] language: Language) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_renames_mixin_config");
@@ -291,6 +318,7 @@ mod tests {
         assert_eq!(config["id"], "example-mod2");
         assert_eq!(config["name"], "Example Mod 2");
         assert_eq!(config["description"], "");
+        assert_eq!(config["icon"], "assets/example-mod2/icon.png".to_string());
         assert_eq!(
             config["entrypoints"]["main"][0],
             "net.fabricmc.example2.ExampleMod2"
