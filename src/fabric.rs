@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::{
     code::{language::Language, refactor},
-    git,
+    file, git,
 };
 
 #[derive(Debug)]
@@ -42,6 +42,14 @@ impl From<refactor::Error> for Error {
 
 impl From<serde_json::Error> for Error {
     fn from(error: serde_json::Error) -> Self {
+        Error {
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<file::Error> for Error {
+    fn from(error: file::Error) -> Self {
         Error {
             message: error.to_string(),
         }
@@ -139,6 +147,10 @@ pub fn create_mod(
     for language in languages {
         println!("Refactoring {} module...", language.to_string());
         refactor_module(path, &language, main_class)?;
+
+        // Replace all string literals equal to "modid" with the mod ID
+        let module_root_path = path.join("src/main").join(language.to_string());
+        file::recursive_replace(&module_root_path, "\"modid\"", &format!("\"{}\"", mod_id))?;
     }
 
     println!("Updating config files...");
