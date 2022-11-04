@@ -56,6 +56,7 @@ fn update_mod_config(path: &Path, mod_id: &str, main_class: &str, name: &str) ->
     config["name"] = serde_json::Value::String(name.to_string());
     config["description"] = serde_json::Value::String("".to_string());
     config["entrypoints"]["main"][0] = serde_json::Value::String(main_class.to_string());
+    config["mixins"][0] = serde_json::Value::String(format!("{}.mixins.json", mod_id));
     std::fs::write(config_path, serde_json::to_string_pretty(&config)?)?;
     Ok(())
 }
@@ -282,6 +283,7 @@ mod tests {
             config["entrypoints"]["main"][0],
             "net.fabricmc.example2.ExampleMod2"
         );
+        assert_eq!(config["mixins"][0], "example-mod2.mixins.json");
     }
 
     #[rstest]
