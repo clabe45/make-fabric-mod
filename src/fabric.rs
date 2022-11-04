@@ -55,7 +55,7 @@ fn update_mod_config(path: &Path, mod_id: &str, main_class: &str, name: &str) ->
     config["id"] = serde_json::Value::String(mod_id.to_string());
     config["name"] = serde_json::Value::String(name.to_string());
     config["description"] = serde_json::Value::String("".to_string());
-    config["entrypoints"]["main"] = serde_json::Value::String(main_class.to_string());
+    config["entrypoints"]["main"][0] = serde_json::Value::String(main_class.to_string());
     std::fs::write(config_path, serde_json::to_string_pretty(&config)?)?;
     Ok(())
 }
@@ -251,7 +251,7 @@ mod tests {
         assert_eq!(config["name"], "Example Mod 2");
         assert_eq!(config["description"], "");
         assert_eq!(
-            config["entrypoints"]["main"],
+            config["entrypoints"]["main"][0],
             "net.fabricmc.example2.ExampleMod2"
         );
     }
