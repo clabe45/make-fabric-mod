@@ -39,15 +39,15 @@ pub fn remove_empty_parent_dirs(path: &Path) -> Result<(), Error> {
 }
 
 fn is_text_file(path: &Path) -> bool {
-    let command = std::process::Command::new("file")
-        .arg("--mime-type")
-        .arg("--brief")
-        .arg(path)
-        .output()
-        .unwrap();
-
-    let output = String::from_utf8(command.stdout).unwrap();
-    output.starts_with("text/")
+    let extension = path.extension().unwrap_or_default();
+    match extension.to_str() {
+        Some("gradle") => true,
+        Some("java") => true,
+        Some("json") => true,
+        Some("kt") => true,
+        Some("properties") => true,
+        _ => false,
+    }
 }
 
 fn replace_in_file(path: &Path, from: &str, to: &str) -> Result<(), Error> {
@@ -105,13 +105,13 @@ mod tests {
     #[test]
     fn test_recursive_replace() {
         let temp_dir = tempfile::tempdir().unwrap();
-        let test_file = temp_dir.path().join("test_file.txt");
-        create_text_file(&test_file, "Hello, world!");
+        let test_file = temp_dir.path().join("test_file.properties");
+        create_text_file(&test_file, "old old old");
         create_binary_file(&temp_dir.path().join("test_file.bin"));
 
-        recursive_replace(&temp_dir.path(), "world", "universe").unwrap();
+        recursive_replace(&temp_dir.path(), "old", "new").unwrap();
 
         let content = fs::read_to_string(&test_file).unwrap();
-        assert_eq!(content, "Hello, universe!");
+        assert_eq!(content, "new new new");
     }
 }
