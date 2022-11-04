@@ -1,4 +1,4 @@
-# New Fabric Mod
+# Create Fabric Mod
 
 >Scaffolding tool for creating Fabric mods in Java and Kotlin
 
