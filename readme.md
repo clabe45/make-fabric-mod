@@ -5,10 +5,10 @@
 ## Usage
 
 ```
-$ new-fabric-mod -h
+$ create-fabric-mod -h
 Create a new Fabric mod
 
-Usage: new-fabric-mod [OPTIONS] --id <MOD_ID> --name <NAME> <PATH>
+Usage: create-fabric-mod [OPTIONS] --id <MOD_ID> --name <NAME> <PATH>
 
 Arguments:
   <PATH>

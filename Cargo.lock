@@ -69,6 +69,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "create-fabric-mod"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "crossterm",
+ "rstest",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "crossterm"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -268,17 +279,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys",
-]
-
-[[package]]
-name = "new-fabric-mod"
-version = "0.1.0"
-dependencies = [
- "clap",
- "crossterm",
- "rstest",
- "serde_json",
- "tempfile",
 ]
 
 [[package]]
