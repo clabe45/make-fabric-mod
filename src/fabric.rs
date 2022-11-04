@@ -60,11 +60,11 @@ fn update_mod_config(path: &Path, mod_id: &str, main_class: &str, name: &str) ->
     Ok(())
 }
 
-fn update_mixin_config(path: &Path, mod_id: &str) -> Result<(), Error> {
+fn update_mixin_config(path: &Path, mod_id: &str, mixin_package: &str) -> Result<(), Error> {
     let config_path = path.join(format!("src/main/resources/{}.mixins.json", mod_id));
     let mut config: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(&config_path)?)?;
-    config["package"] = serde_json::Value::String(mod_id.to_string());
+    config["package"] = serde_json::Value::String(mixin_package.to_string());
     std::fs::write(config_path, serde_json::to_string_pretty(&config)?)?;
     Ok(())
 }
@@ -147,7 +147,11 @@ pub fn create_mod(
         path.join("src/main/resources/modid.mixins.json"),
         path.join(format!("src/main/resources/{}.mixins.json", mod_id)),
     )?;
-    update_mixin_config(path, mod_id)?;
+    let mixin_package = format!(
+        "{}.mixins",
+        main_class[..main_class.rfind('.').unwrap()].to_string()
+    );
+    update_mixin_config(path, mod_id, &mixin_package)?;
 
     // Update the mod config
     update_mod_config(path, mod_id, main_class, name)?;
@@ -227,6 +231,30 @@ mod tests {
 
         let mixin_config = path.join("src/main/resources/example-mod2.mixins.json");
         assert!(mixin_config.exists());
+    }
+
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+    fn test_create_mod_updates_mixin_config(#[case] language: Language) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_updates_mixin_config");
+        fabric::create_mod(
+            &path,
+            "example-mod2",
+            &language,
+            "net.fabricmc.example2.ExampleMod2",
+            "Example Mod 2",
+        )
+        .unwrap();
+
+        let mixin_config = path.join("src/main/resources/example-mod2.mixins.json");
+        let contents = std::fs::read_to_string(mixin_config).unwrap();
+        let config: serde_json::Value = serde_json::from_str(&contents).unwrap();
+        assert_eq!(
+            config["package"],
+            serde_json::Value::String("net.fabricmc.example2.mixins".to_string())
+        );
     }
 
     #[rstest]
