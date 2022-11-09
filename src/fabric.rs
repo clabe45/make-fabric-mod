@@ -224,8 +224,8 @@ mod tests {
     #[test]
     fn test_validate_version() {
         assert!(fabric::validate_version("1.17").is_ok());
-        assert!(!fabric::validate_version("1").is_ok());
-        assert!(!fabric::validate_version("1.17.1").is_ok());
+        assert!(fabric::validate_version("1").is_err());
+        assert!(fabric::validate_version("1.17.1").is_err());
     }
 
     #[rstest]
