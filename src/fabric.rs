@@ -147,7 +147,15 @@ pub fn create_mod(
     };
     println!("Cloning {}...", template_url);
     let global = git::Context::new(&None)?;
-    global.git(&["clone", "--depth", "1", "--branch", minecraft_version, template_url, path.to_str().unwrap()])?;
+    global.git(&["clone", "--depth", "1", "--branch", minecraft_version, template_url, path.to_str().unwrap()])
+        .map_err(|e| match e.kind() {
+            // If git is installed but the command failed, it's probably because
+            // the version branch doesn't exist
+            git::ErrorKind::GitFailed => Error {
+                message: format!("Unsupported Minecraft version: {}", minecraft_version),
+            },
+            _ => e.into(),
+        })?;
 
     println!("Re-initializing git repository...");
 
@@ -218,6 +226,21 @@ mod tests {
         assert!(fabric::validate_version("1.17").is_ok());
         assert!(!fabric::validate_version("1").is_ok());
         assert!(!fabric::validate_version("1.17.1").is_ok());
+    }
+
+    #[rstest]
+    #[case(Language::Java)]
+    #[case(Language::Kotlin)]
+    fn test_unsupported_version(#[case] language: Language) {
+        assert!(fabric::create_mod(
+            &std::path::Path::new("test"),
+            "test",
+            "1.16",
+            &language,
+            "test",
+            "test"
+        )
+        .is_err());
     }
 
     #[rstest]

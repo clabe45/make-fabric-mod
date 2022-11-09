@@ -4,8 +4,22 @@ use std::{
 };
 
 #[derive(Debug)]
+pub enum ErrorKind {
+    GitNotFound,
+    GitFailed,
+    Other,
+}
+
+#[derive(Debug)]
 pub struct Error {
     message: String,
+    kind: ErrorKind,
+}
+
+impl Error {
+    pub fn kind(&self) -> &ErrorKind {
+        &self.kind
+    }
 }
 
 impl std::fmt::Display for Error {
@@ -16,8 +30,15 @@ impl std::fmt::Display for Error {
 
 impl From<std::io::Error> for Error {
     fn from(error: std::io::Error) -> Self {
-        Error {
-            message: error.to_string(),
+        match error.kind() {
+            std::io::ErrorKind::NotFound => Error {
+                message: "Git not found".to_string(),
+                kind: ErrorKind::GitNotFound,
+            },
+            _ => Error {
+                message: error.to_string(),
+                kind: ErrorKind::Other,
+            },
         }
     }
 }
@@ -26,6 +47,7 @@ impl From<std::string::FromUtf8Error> for Error {
     fn from(error: std::string::FromUtf8Error) -> Self {
         Error {
             message: error.to_string(),
+            kind: ErrorKind::GitFailed,
         }
     }
 }
@@ -54,7 +76,8 @@ impl Context {
 
         if !output.status.success() {
             return Err(Error {
-                message: format!("git failed: {}", stderr),
+                message: stderr,
+                kind: ErrorKind::GitFailed,
             });
         }
 
