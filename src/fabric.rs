@@ -127,7 +127,7 @@ pub fn create_mod(
     };
     println!("Cloning {}...", template_url);
     let global = git::Context::new(&None)?;
-    global.git(&["clone", template_url, path.to_str().unwrap()])?;
+    global.git(&["clone", "--depth", "1", template_url, path.to_str().unwrap()])?;
 
     println!("Re-initializing git repository...");
 
