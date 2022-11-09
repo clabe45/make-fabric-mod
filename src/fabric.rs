@@ -169,7 +169,7 @@ pub fn create_mod(
         path.join(format!("src/main/resources/{}.mixins.json", mod_id)),
     )?;
     let mixin_package = format!(
-        "{}.mixins",
+        "{}.mixin",
         main_class[..main_class.rfind('.').unwrap()].to_string()
     );
     update_mixin_config(path, mod_id, &mixin_package)?;
@@ -293,7 +293,7 @@ mod tests {
         let config: serde_json::Value = serde_json::from_str(&contents).unwrap();
         assert_eq!(
             config["package"],
-            serde_json::Value::String("net.fabricmc.example2.mixins".to_string())
+            serde_json::Value::String("net.fabricmc.example2.mixin".to_string())
         );
     }
 
