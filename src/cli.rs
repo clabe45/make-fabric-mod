@@ -41,6 +41,9 @@ struct Opts {
     #[clap(short = 'n', long = "name", help = "Mod name")]
     name: String,
 
+    #[clap(short = 'm', long = "minecraft", help = "Minecraft version (x.y)")]
+    minecraft_version: String,
+
     #[clap(short = 'k', long = "kotlin", help = "Use Kotlin instead of Java")]
     kotlin: bool,
 
@@ -68,6 +71,6 @@ pub fn cli() -> Result<(), Error> {
         Language::Java
     };
 
-    fabric::create_mod(&opts.path, &mod_id, &language, &opts.main_class, &opts.name)?;
+    fabric::create_mod(&opts.path, &mod_id, &opts.minecraft_version, &language, &opts.main_class, &opts.name)?;
     Ok(())
 }

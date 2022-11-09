@@ -56,6 +56,23 @@ impl From<file::Error> for Error {
     }
 }
 
+fn validate_version(version: &str) -> Result<(), Error> {
+    if !version.chars().all(|c| c.is_digit(10) || c == '.') {
+        return Err(Error {
+            message: format!("Invalid version: {}", version),
+        });
+    }
+
+    let parts = version.split('.');
+    if parts.count() != 2 {
+        return Err(Error {
+            message: format!("Invalid version: {}. Expected 2 parts (e.g. 1.19)", version),
+        });
+    }
+
+    return Ok(());
+}
+
 fn update_mod_config(path: &Path, mod_id: &str, main_class: &str, name: &str) -> Result<(), Error> {
     let config_path = path.join("src/main/resources/fabric.mod.json");
     let mut config: serde_json::Value =
@@ -116,10 +133,13 @@ fn refactor_module(path: &Path, language: &Language, main_class: &str) -> Result
 pub fn create_mod(
     path: &Path,
     mod_id: &str,
+    minecraft_version: &str,
     language: &Language,
     main_class: &str,
     name: &str,
 ) -> Result<(), Error> {
+    validate_version(minecraft_version)?;
+
     // Clone the Kotlin example mod
     let template_url = match language {
         Language::Kotlin => "https://github.com/clabe45/fabric-example-mod-kotlin",
@@ -127,7 +147,7 @@ pub fn create_mod(
     };
     println!("Cloning {}...", template_url);
     let global = git::Context::new(&None)?;
-    global.git(&["clone", "--depth", "1", template_url, path.to_str().unwrap()])?;
+    global.git(&["clone", "--depth", "1", "--branch", minecraft_version, template_url, path.to_str().unwrap()])?;
 
     println!("Re-initializing git repository...");
 
@@ -193,15 +213,25 @@ mod tests {
 
     use crate::{code::language::Language, fabric};
 
+    #[test]
+    fn test_validate_version() {
+        assert!(fabric::validate_version("1.17").is_ok());
+        assert!(!fabric::validate_version("1").is_ok());
+        assert!(!fabric::validate_version("1.17.1").is_ok());
+    }
+
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_creates_git_repo(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_creates_git_repo(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_creates_git_repo");
         fabric::create_mod(
             &path,
             "example-mod",
+            minecraft_version,
             &language,
             "net.fabricmc.example.ExampleMod",
             "Example Mod",
@@ -213,14 +243,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_moves_entrypoint(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_moves_entrypoint(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_moves_entrypoint");
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example2.ExampleMod2",
             "Example Mod 2",
@@ -236,14 +269,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_moves_assets(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_moves_assets(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_moves_assets");
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example3.ExampleMod2",
             "Example Mod 2",
@@ -255,14 +291,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_renames_mixin_config(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_renames_mixin_config(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_renames_mixin_config");
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example3.ExampleMod2",
             "Example Mod 2",
@@ -274,14 +313,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_updates_mixin_config(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_updates_mixin_config(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_updates_mixin_config");
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example2.ExampleMod2",
             "Example Mod 2",
@@ -298,14 +340,17 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_updates_mod_config(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_updates_mod_config(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir.path().join("test_create_mod_updates_mod_id");
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example2.ExampleMod2",
             "Example Mod 2",
@@ -327,9 +372,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Language::Java)]
-    #[case(Language::Kotlin)]
-    fn test_create_mod_updates_gradle_properties(#[case] language: Language) {
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_updates_gradle_properties(#[case] language: Language, #[case] minecraft_version: &str) {
         let temp_dir = tempfile::tempdir().unwrap();
         let path = temp_dir
             .path()
@@ -337,6 +384,7 @@ mod tests {
         fabric::create_mod(
             &path,
             "example-mod2",
+            minecraft_version,
             &language,
             "net.fabricmc.example2.ExampleMod2",
             "Example Mod 2",
