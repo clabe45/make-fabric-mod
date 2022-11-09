@@ -45,8 +45,8 @@ struct Opts {
     kotlin: bool,
 
     #[clap(
-        short = 'm',
-        long = "main",
+        short = 'e',
+        long = "entrypoint",
         help = "Main class",
         default_value = "net.fabricmc.example.ExampleMod"
     )]
