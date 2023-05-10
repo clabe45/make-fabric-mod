@@ -223,9 +223,20 @@ pub fn create_mod(
 
 #[cfg(test)]
 mod tests {
+    use std::path::{Path, PathBuf};
     use rstest::rstest;
 
     use crate::{code::language::Language, fabric};
+
+    // Returns the path to gradlew or gradlew.bat, depending on the platform
+    fn gradlew_executable(project_dir: &Path) -> PathBuf {
+        let gradlew = if cfg!(windows) {
+            project_dir.join("gradlew.bat")
+        } else {
+            project_dir.join("gradlew")
+        };
+        gradlew
+    }
 
     #[test]
     fn test_validate_version() {
@@ -446,5 +457,36 @@ mod tests {
         let contents = std::fs::read_to_string(gradle_properties).unwrap();
         assert!(contents.contains("net.fabricmc"));
         assert!(contents.contains("example2"));
+    }
+
+    #[rstest]
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_can_compile(#[case] language: Language, #[case] minecraft_version: &str) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_can_compile");
+        fabric::create_mod(
+            &path,
+            "example-mod2",
+            minecraft_version,
+            &language,
+            "net.fabricmc.example2.ExampleMod2",
+            "Example Mod 2",
+        )
+        .unwrap();
+
+        let gradlew = gradlew_executable(&path);
+        let mut command = std::process::Command::new(gradlew);
+        command
+            .current_dir(&path)
+            .arg("build")
+            .arg("--stacktrace")
+            .arg("--no-daemon")
+            .arg("--console=plain");
+        let output = command.output().unwrap();
+        assert!(output.status.success());
+        assert!(output.stderr.is_empty());
     }
 }
