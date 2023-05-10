@@ -2,7 +2,7 @@
 name = "make-fabric-mod"
 description = "Scaffolding tool for creating Fabric mods in Java and Kotlin"
 repository = "https://github.com/clabe45/make-fabric-mod"
-version = "0.1.0"
+version = "0.1.1"
 readme = "readme.md"
 license-file = "LICENSE"
 keywords = ["fabric", "minecraft", "mod", "scaffolding", "cli"]

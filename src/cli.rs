@@ -26,7 +26,7 @@ impl From<fabric::Error> for Error {
 #[derive(Parser, Debug)]
 #[command(
     author = "Caleb Sacks",
-    version = "0.1.0",
+    version = "0.1.1",
     about = "Create a new Fabric mod"
 )]
 struct Opts {
