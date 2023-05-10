@@ -16,16 +16,17 @@ $ cargo install make-fabric-mod
 $ make-fabric-mod -h
 Create a new Fabric mod
 
-Usage: make-fabric-mod [OPTIONS] --name <NAME> <PATH>
+Usage: make-fabric-mod [OPTIONS] --name <NAME> --minecraft <MINECRAFT_VERSION> --entrypoint <MAIN_CLASS> <PATH>
 
 Arguments:
-  <PATH>
+  <PATH>  
 
 Options:
-  -i, --id <MOD_ID>        Mod ID. Defaults to the name of the directory [default: ]
-  -n, --name <NAME>        Mod name
-  -k, --kotlin             Use Kotlin instead of Java
-  -m, --main <MAIN_CLASS>  Main class [default: net.fabricmc.example.ExampleMod]
-  -h, --help               Print help information
-  -V, --version            Print version information
+  -i, --id <MOD_ID>                    Mod ID. Defaults to the name of the directory [default: ]
+  -n, --name <NAME>                    Mod name
+  -m, --minecraft <MINECRAFT_VERSION>  Minecraft version (x.y)
+  -k, --kotlin                         Use Kotlin instead of Java
+  -e, --entrypoint <MAIN_CLASS>        Main class (e.g., 'net.fabricmc.example.ExampleMod')
+  -h, --help                           Print help information
+  -V, --version                        Print version information
 ```
