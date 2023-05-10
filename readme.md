@@ -2,6 +2,14 @@
 
 >Scaffolding tool for creating Fabric mods in Java and Kotlin
 
+## Installation
+
+make-fabric-mod can be installed with cargo:
+
+```
+$ cargo install make-fabric-mod
+```
+
 ## Usage
 
 ```
