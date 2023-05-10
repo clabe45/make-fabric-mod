@@ -31,6 +31,10 @@ Options:
   -V, --version                        Print version information
 ```
 
+## Changelog
+
+See the [changelog](CHANGELOG.md) for the up-to-date history of the project's changes.
+
 ## License
 
 This project is licensed under [GPL v3](LICENSE.md).
