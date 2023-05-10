@@ -30,3 +30,7 @@ Options:
   -h, --help                           Print help information
   -V, --version                        Print version information
 ```
+
+## License
+
+This project is licensed under [GPL v3](LICENSE.md).
