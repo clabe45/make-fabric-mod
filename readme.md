@@ -37,4 +37,4 @@ See the [changelog](CHANGELOG.md) for the up-to-date history of the project's ch
 
 ## License
 
-This project is licensed under [GPL v3](LICENSE.md).
+This project is licensed under [GPL v3](LICENSE).
