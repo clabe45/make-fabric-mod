@@ -50,8 +50,7 @@ struct Opts {
     #[clap(
         short = 'e',
         long = "entrypoint",
-        help = "Main class",
-        default_value = "net.fabricmc.example.ExampleMod"
+        help = "Main class (e.g., 'net.fabricmc.example.ExampleMod')"
     )]
     main_class: String,
 
