@@ -159,6 +159,12 @@ pub fn create_mod(
 
     println!("Re-initializing git repository...");
 
+    // Remove the license file if present
+    let license_path = path.join("LICENSE");
+    if license_path.exists() {
+        std::fs::remove_file(license_path)?;
+    }
+
     // Remove the .git directory
     let git_dir = path.join(".git");
     std::fs::remove_dir_all(git_dir)?;
@@ -263,6 +269,28 @@ mod tests {
 
         let git_dir = path.join(".git");
         assert!(git_dir.exists());
+    }
+
+    #[rstest]
+    #[case(Language::Java, "1.18")]
+    #[case(Language::Kotlin, "1.18")]
+    #[case(Language::Java, "1.19")]
+    #[case(Language::Kotlin, "1.19")]
+    fn test_create_mod_excludes_license(#[case] language: Language, #[case] minecraft_version: &str) {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let path = temp_dir.path().join("test_create_mod_creates_git_repo");
+        fabric::create_mod(
+            &path,
+            "example-mod",
+            minecraft_version,
+            &language,
+            "net.fabricmc.example.ExampleMod",
+            "Example Mod",
+        )
+        .unwrap();
+
+        let license_path = path.join("LICENSE");
+        assert!(!license_path.exists());
     }
 
     #[rstest]

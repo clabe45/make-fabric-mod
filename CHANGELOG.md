@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Changes
 
 ### Fixes
+* No longer generate license file.
 
 ### Breaks
 
