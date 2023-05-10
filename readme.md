@@ -1,14 +1,14 @@
-# Create Fabric Mod
+# `make-fabric-mod`
 
 >Scaffolding tool for creating Fabric mods in Java and Kotlin
 
 ## Usage
 
 ```
-$ create-fabric-mod -h
+$ make-fabric-mod -h
 Create a new Fabric mod
 
-Usage: create-fabric-mod [OPTIONS] --name <NAME> <PATH>
+Usage: make-fabric-mod [OPTIONS] --name <NAME> <PATH>
 
 Arguments:
   <PATH>
