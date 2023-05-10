@@ -23,7 +23,7 @@ Arguments:
 
 Options:
   -i, --id <MOD_ID>                    Mod ID. Defaults to the name of the directory [default: ]
-  -n, --name <NAME>                    Mod name
+  -n, --name <NAME>                    Human-friendly mod name
   -m, --minecraft <MINECRAFT_VERSION>  Minecraft version (x.y)
   -k, --kotlin                         Use Kotlin instead of Java
   -e, --entrypoint <MAIN_CLASS>        Main class (e.g., 'net.fabricmc.example.ExampleMod')

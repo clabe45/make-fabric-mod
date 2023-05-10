@@ -38,7 +38,7 @@ struct Opts {
     )]
     mod_id: String,
 
-    #[clap(short = 'n', long = "name", help = "Mod name")]
+    #[clap(short = 'n', long = "name", help = "Human-friendly mod name")]
     name: String,
 
     #[clap(short = 'm', long = "minecraft", help = "Minecraft version (x.y)")]
